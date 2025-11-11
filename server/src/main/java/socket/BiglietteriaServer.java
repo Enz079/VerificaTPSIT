@@ -11,7 +11,6 @@ import java.util.Map;
 public class BiglietteriaServer {
 
     public static final int port = 3000;
-    public static List<Integer> biglietti = new ArrayList<>();
 
     public static Map<String,Integer> disponibilita = new HashMap<>();
     
@@ -26,7 +25,7 @@ public class BiglietteriaServer {
         
                         Socket clientSocket = serverSocket.accept();
                         System.out.println("Nuovo client connesso: " + clientSocket.getInetAddress());
-                        new ClientHandler(clientSocket, biglietti, disponibilita).start();
+                        new ClientHandler(clientSocket, disponibilita).start();
             }
         } 
         catch (IOException e){

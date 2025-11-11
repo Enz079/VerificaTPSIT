@@ -5,27 +5,21 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class ClientHandler extends Thread {
 
     private final Socket socket;
-    public static List<Integer> biglietti;
     Map<String,Integer> disponibilita; 
     private String username;
     private BufferedReader in;
     private PrintWriter out;
 
-    public ClientHandler(Socket socket, List<Integer> biglietti, Map<String,Integer> disponibilita){
+    public ClientHandler(Socket socket, Map<String,Integer> disponibilita){
                 
         this.socket = socket;
-        biglietti = new ArrayList<>();
-        biglietti.add(10);
-        biglietti.add(30);
-        biglietti.add(60);
+        
         disponibilita = new HashMap<>();
 
         disponibilita.put("Gold", 10);
