@@ -6,41 +6,42 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ClientHandler extends Thread {
 
     private final Socket socket;
-    public static List<Biglietto> biglietti;
+    public static List<Integer> biglietti;
+    Map<String,Integer> disponibilita; 
     private String username;
-    private Biglietto gold;
-    private Biglietto pit;
-    private Biglietto parterre;
     private BufferedReader in;
     private PrintWriter out;
 
-    public ClientHandler(Socket socket, List<Biglietto> biglietti){
+    public ClientHandler(Socket socket, List<Integer> biglietti, Map<String,Integer> disponibilita){
                 
         this.socket = socket;
         biglietti = new ArrayList<>();
+        biglietti.add(10);
+        biglietti.add(30);
+        biglietti.add(60);
+        disponibilita = new HashMap<>();
+
+        disponibilita.put("Gold", 10);
+        disponibilita.put("Pit", 30);
+        disponibilita.put("Parterre", 60);
    }
 
     @Override
     public void run() {
         try {
-            gold.setDisponibilita(10);
-            pit.setDisponibilita(30);
-            parterre.setDisponibilita(60);
             
-            biglietti.add(gold);
-            biglietti.add(pit);
-            biglietti.add(parterre);
-
             this.in = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
             this.out = new PrintWriter(this.socket.getOutputStream(), true);
         
             this.out.println("WELCOME");
-
+   
             boolean loggedIn = false;
 
             while(!loggedIn){
@@ -63,12 +64,12 @@ public class ClientHandler extends Thread {
                     }
                     else {
 
-                        this.out.println("ERR ");
+                        this.out.println("ERR LOGINREQUIRED");
                     }
                 } 
                 else{
 
-                    this.out.println("ERR");
+                    this.out.println("ERR LOGINREQUIRED");
                 }
             }
 
@@ -77,10 +78,46 @@ public class ClientHandler extends Thread {
 
                 switch (command) {
                     case "N":
-                        this.out.println("AVAIL" + "Gold " + biglietti);
-                        
+                        this.out.print("AVAIL");
+                        for (Map.Entry<String, Integer> x : disponibilita.entrySet()) {
+                            this.out.println(x.getKey() + ": " + x.getValue());
+                        }
                         break;
                 
+                    case "BUY":
+
+                        String biglietto = in.readLine().toLowerCase();
+                        int qta;
+
+                        if (biglietto.startsWith("gold")) {
+                            
+                            qta = Integer.parseInt(biglietto.substring(5).trim());
+
+                            Integer valore = disponibilita.get("gold");
+                            int nuovoValore = valore - qta;
+                            disponibilita.put("Gold", nuovoValore);
+                        }
+                        else if(biglietto.startsWith("pit")) {
+                            
+                            qta = Integer.parseInt(biglietto.substring(4).trim());
+                            Integer valore = disponibilita.get("pit");
+                            int nuovoValore = valore - qta;
+                            disponibilita.put("Pit", nuovoValore);
+                        }
+                        else{
+                            
+                            qta = Integer.parseInt(biglietto.substring(9).trim());
+                            Integer valore = disponibilita.get("Parterre");
+                            int nuovoValore = valore - qta;
+                            disponibilita.put("Parterre", nuovoValore);
+                        }
+                        break;
+
+                    case "QUIT":
+
+                        this.out.println("BYE");
+                        socket.close();
+
                     default: this.out.println("Comando non valido");
                         break;
                 }
